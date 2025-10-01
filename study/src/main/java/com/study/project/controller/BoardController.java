@@ -18,6 +18,10 @@ public class BoardController {
 	
 	@Autowired
 	public BoardServiceInter service;
+	
+	public String testaa() {
+		return null;
+	}
 
 	@RequestMapping("list")
 	@ResponseBody
