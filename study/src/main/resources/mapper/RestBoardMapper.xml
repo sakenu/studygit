@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.project.rest.RestBoardMapper">
+
+	<resultMap type="com.study.project.rest.RestBoardDTO" id="aa">
+		<result column="board_num" property="boardNum"/>
+		<result column="user_id" property="userId"/>
+		<result column="user_name" property="userName"/>
+		<result column="board_subject" property="boardSubject"/>
+		<result column="board_content" property="boardContent"/>
+		<result column="reg_date" property="regDate"/>
+		<result column="upt_date" property="uptDate"/>
+		<result column="view_cnt" property="viewCnt"/>
+	</resultMap>
+	
+	
+	
+	<select id="read" parameterType="int" resultMap="aa">
+		select
+			board_num
+			, user_id
+			, user_name
+			, board_subject
+			, board_content
+			, reg_date
+			, upt_date
+			, view_cnt
+		from board
+		where board_num = #{num}
+	</select>
+	
+	<select id="fileFind" parameterType="int" resultType="com.study.project.rest.RestFileDTO">
+	
+		select
+			file_num				as fileNum
+			, board_num			as boardNum
+			, real_name			as realName
+			, save_name			as saveName
+			, save_path			as savePath
+			, file_save_date		as fileSaveDate
+		from board_file
+		where board_num = #{num}
+	
+	</select>
+
+	<select id="findAll" resultType="map">
+		select
+			board_num
+			, user_id
+			, user_name
+			, board_subject
+			, board_content
+			, reg_date
+			, upt_date
+			, view_cnt
+		from board
+		
+		<!-- 동적쿼리 -->
+		
+		
+	</select>
+	
+	<sql id="searchSql">
+		<choose>
+			<when test="searchType == 'name'">
+				and user_name like concat('%',#{searchTxt},'%')
+				<!--  oracle   '%'||#{searchTxt}||'%'  || \(shift) --> 	
+			</when>
+			<when test="searchType == 'subject'">
+				and board_subject like concat('%',#{searchTxt},'%')
+			</when>
+			<when test = "searchType == 'subCont'">
+				and ( board_subject like concat('%',#{searchTxt},'%') 
+					or board_content like concat('%',#{searchTxt},'%')
+				)
+				
+			</when>
+			
+		</choose>
+	
+		 
+		<if test="stDate != null">
+			and reg_date between #{stDate} and #{endDate}
+		</if>	
+	</sql>
+	
+	
+	<select id="dtoFindAll" resultMap="aa" parameterType="com.study.project.rest.SearchDTO">
+		select
+			board_num
+			, user_id
+			, user_name
+			, board_subject
+			, board_content
+			, reg_date
+			, upt_date
+			, view_cnt
+		from board
+		where 1=1
+		<include refid="searchSql"></include>
+		order by board_num desc 
+		
+		limit #{pageSize} offset #{offset}
+
+
+	</select>
+	
+	<select id="totalCount" resultType="int" parameterType="com.study.project.rest.SearchDTO">
+		select count(board_num) from board
+		where 1=1
+		<include refid="searchSql"></include>
+	</select>
+	
+
+	
+	<insert id = "create" parameterType="com.study.project.rest.RestBoardDTO" 
+		keyProperty="boardNum" useGeneratedKeys="true">
+		insert into board
+		(
+			user_id
+			,user_name
+			,board_subject
+			,board_content
+			,reg_date
+			,view_cnt
+			
+		)values (
+			#{userId}
+			,#{userName}
+			,#{boardSubject}
+			,#{boardContent}
+			,now()
+			,0
+		)
+	</insert>
+	
+	<insert id = "fileCreate" parameterType="com.study.project.rest.RestFileDTO">
+		insert into board_file
+		(
+			board_num
+			,real_name
+			,save_name
+			,save_path
+			,file_save_date
+		)
+		values (
+			#{boardNum}
+			, #{realName}
+			, #{saveName}
+			, #{savePath}
+			, now() 
+		)
+	</insert>
+
+
+
+
+
+
+
+
+
+
+
+
+
+</mapper>

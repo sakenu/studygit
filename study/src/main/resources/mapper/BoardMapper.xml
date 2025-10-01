@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.study.project.repository.BoardMapper">
+
+	<select id = "list" resultType="map">
+		select
+			board_num
+			, user_id
+			, user_name
+			, board_subject
+			, board_content
+			, reg_date
+			, upt_date
+			, view_cnt
+		from board
+		
+	</select>
+	
+	
+	<insert id="insert" parameterType="map">
+		insert into board (
+			user_id
+			,user_name
+			,board_subject
+			,board_content
+			,reg_date
+			,view_cnt
+		)values(
+			#{inputId}
+			,#{inputName}
+			,#{inputSubject}
+			,#{inputContent}
+			,now()
+			,0
+		)
+		
+		<!--  boot::::{inputId=react123, inputName=리액트, inputSubject=boot교육중, inputContent=어려워}-->
+	</insert>
+	
+	<select id="detail" parameterType="int" resultType="map">
+		select
+			board_num
+			, user_id
+			, user_name
+			, board_subject
+			, board_content
+			, reg_date
+			, upt_date
+			, view_cnt
+		from board
+		where board_num = #{num}
+	</select>
+	
+	<update id="update" parameterType="map">
+		update board
+		set user_id = #{inputId}
+			, user_name = #{inputName} 
+			, board_subject = #{inputSubject} 
+			, board_content =  #{inputContent}
+			, upt_date = now()
+		where board_num = #{boardNum}
+	</update>
+	
+	<delete id = "delete" parameterType="int">
+		delete from board
+		where board_num = #{num}
+	</delete>
+	
+	<update id="viewCnt" parameterType="int">
+		update board
+			set view_cnt = view_cnt + 1
+		where board_num = #{num}
+	</update>
+	
+	<delete id="deleteNums" parameterType="integer">
+		delete from board
+		where board_num in (
+			<foreach collection="list" separator="," item="nums">
+				#{nums}
+			</foreach>			
+		)
+	
+	</delete>
+	
+	
+</mapper>
